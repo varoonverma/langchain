@@ -61,7 +61,7 @@ def _parse_with_openai(xml_content, api_key):
 
     except Exception as e:
         st.error(f"Error during extraction with OpenAI: {str(e)}")
-        return _fallback_extraction_openai(llm, simplified_xml, xml_content)
+        return {"error": str(e), "raw_data": xml_content}
 
 
 def _parse_atom_xml_directly(xml_content):
@@ -287,60 +287,3 @@ def _extract_flight_summary(xml_content):
 
     except Exception:
         return "ATOM XML Flight Data"
-
-
-def _fallback_extraction_openai(llm, simplified_xml, xml_content):
-    flight_summary = _extract_flight_summary(xml_content)
-
-    custom_prompt = PromptTemplate(
-        input_variables=["xml", "summary"],
-        template="""
-        Extract structured information from this ATOM XML flight data for {summary}.
-        
-        XML:
-        {xml}
-        
-        Extract the following as a JSON object:
-        - airline: The airline code (e.g., QFA)
-        - airline2: The alternative airline code (e.g., QF)
-        - flight_number: The flight number
-        - origin_date_local: The local date of origin
-        - origin_date_utc: The UTC date of origin
-        - departure_port: Departure airport code
-        - departure_country: Departure country code
-        - departure_time: Scheduled departure time
-        - arrival_port: Arrival airport code
-        - arrival_country: Arrival country code
-        - arrival_time: Scheduled arrival time
-        - status: Flight status
-        - aircraft_registration: Aircraft registration number
-        - aircraft_type: Aircraft type code
-        
-        Return ONLY a valid JSON object with no additional text.
-        """
-    )
-
-    try:
-        if hasattr(llm, 'invoke'):
-            response = llm.invoke(custom_prompt.format(
-                xml=simplified_xml[:10000],
-                summary=flight_summary
-            ))
-            content = response.content if hasattr(response, 'content') else response
-        else:
-            content = llm(custom_prompt.format(
-                xml=simplified_xml[:10000],
-                summary=flight_summary
-            ))
-
-        json_start = content.find('{')
-        json_end = content.rfind('}') + 1
-        if json_start >= 0 and json_end > json_start:
-            extracted_data = json.loads(content[json_start:json_end])
-            extracted_data["raw_data"] = xml_content
-            return extracted_data
-        else:
-            return {"error": "Could not extract data", "raw_data": xml_content}
-
-    except Exception:
-        return {"error": "Extraction failed", "raw_data": xml_content}
