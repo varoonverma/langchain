@@ -8,7 +8,7 @@ from config import OPENAI_VECTOR_PATH, LLAMA_VECTOR_PATH
 
 
 st.set_page_config(page_title="ATOM XML Flight Data Processor", layout="wide")
-st.title("Qantas Flight Data Processor and Query System")
+st.title("Flight Data Processor and Query System")
 
 # Initialize session state
 if "use_openai" not in st.session_state:

@@ -42,7 +42,7 @@ def generate_answer(llm, query, flight_data):
         return "Error: LLM model could not be initialized"
 
     flight_table = "\n".join([
-        f"{row[0]} {row[1]} on {row[2]}: {row[3]} ({row[4]}) to {row[5]} ({row[6]})"
+        f"{row[0]} {row[1]} on {row[2]}: from {row[3]} ({row[4]}) to {row[5]} ({row[6]})"
         for row in flight_data
     ])
 

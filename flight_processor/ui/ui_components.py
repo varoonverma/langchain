@@ -205,7 +205,9 @@ def render_search_tab(session_state):
                 )
 
                 llm = ModelFactory.get_llm(api_key, use_openai=use_openai)
-                answer = generate_answer(llm, query, flight_data)
+                answer = ""
+                if not use_openai:
+                    answer = generate_answer(llm, query, flight_data)
 
                 st.markdown("### AI Answer")
                 st.write(answer)
